@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crown of Glyphs — Card Vault</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root {
+      --ink: #e9e9f4; --muted: #9293a9; --panel: rgba(25, 27, 44, .78);
+      --line: rgba(255,255,255,.1); --gold: #f0bf64; --gold-soft: #ffdda0;
+      --bg: #0c0d16; --purple: #a994ff; --cyan: #76d9cf;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--bg); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
+    body:before { content:""; position:fixed; inset:0; z-index:-1; background: radial-gradient(circle at 75% -10%, #332c54 0, transparent 35%), radial-gradient(circle at -5% 80%, #16313a 0, transparent 30%), linear-gradient(135deg,#0d0e18,#111324 55%,#0a0b12); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { width: min(1440px, calc(100% - 48px)); margin: auto; }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 28px 0 22px; border-bottom: 1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap: 14px; }
+    .sigil { width:46px; height:46px; display:grid; place-items:center; color:var(--gold); border:1px solid #876d37; border-radius: 14px; background:linear-gradient(145deg,#2c2440,#141625); box-shadow:0 0 28px #d39a3826; font-size:25px; }
+    .eyebrow { color:var(--gold); font: 11px 'DM Mono'; letter-spacing: 2px; text-transform: uppercase; }
+    h1 { font-size: clamp(24px, 3vw, 38px); margin: 2px 0 0; letter-spacing:-1.5px; }
+    .header-meta { display:flex; gap: 10px; align-items:center; color:var(--muted); font: 12px 'DM Mono'; }
+    .pill { border:1px solid var(--line); border-radius:99px; padding:8px 12px; background:#ffffff08; }
+    .hero { display:flex; align-items:end; justify-content:space-between; gap:30px; padding:38px 0 25px; }
+    .hero h2 { font-size: clamp(28px, 5vw, 60px); line-height:.95; letter-spacing:-3px; max-width: 720px; margin: 8px 0 15px; }
+    .hero p { color:var(--muted); max-width:620px; line-height:1.55; margin:0; }
+    .stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; min-width:330px; background:var(--line); border:1px solid var(--line); }
+    .stat { padding:18px 20px; background:#121422; } .stat b { display:block; font-size:27px; color:var(--gold-soft); } .stat span { color:var(--muted); font:11px 'DM Mono'; text-transform:uppercase; }
+    .toolbar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:10px; padding:16px 0; background:#0c0d16e8; backdrop-filter:blur(16px); border-block:1px solid var(--line); }
+    .search { flex:1 1 270px; position:relative; } .search input, select { width:100%; color:var(--ink); background:#171927; border:1px solid var(--line); border-radius:10px; padding:12px 14px; outline:0; } .search input:focus, select:focus { border-color:var(--gold); }
+    .filter-block { display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1 1 100%; } .filter-caption { color:var(--muted); font:10px 'DM Mono'; text-transform:uppercase; letter-spacing:1px; min-width:62px; } .filters { display:flex; gap:7px; flex-wrap:wrap; } .filter { border:1px solid var(--line); color:var(--muted); background:#171927; border-radius:9px; padding:9px 11px; font-size:12px; transition:.2s; } .filter.active, .filter:hover { color:#16131a; background:var(--gold); border-color:var(--gold); }
+    select { width:150px; color:var(--muted); }
+    .section-label { display:flex; justify-content:space-between; align-items:center; margin:30px 0 14px; color:var(--muted); font:12px 'DM Mono'; text-transform:uppercase; letter-spacing:1px; }
+    #grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:18px; padding-bottom:60px; }
+    .card { position:relative; aspect-ratio:2 / 3; min-height:0; display:flex; flex-direction:column; overflow:hidden; padding:11px; border:2px solid color-mix(in srgb,var(--accent) 62%,#ffffff22); border-radius:16px; background:linear-gradient(155deg,#25263b,#151725 70%); transition:.2s transform,.2s border-color,.2s box-shadow; isolation:isolate; }
+    .card:hover { transform:translateY(-5px) scale(1.01); border-color:var(--accent); box-shadow:0 15px 35px #0008,0 0 25px color-mix(in srgb,var(--accent) 18%,transparent); } .card:after { content:""; position:absolute; inset:0; z-index:-1; background-image:linear-gradient(180deg,#0b0c14aa 0%,#111322cc 42%,#0d0e18 100%),var(--map); background-size:cover; background-position:center; opacity:.34; filter:saturate(.8); } .card:before { content:""; position:absolute; width:170px; height:170px; border-radius:50%; right:-74px; top:-70px; background:var(--accent); opacity:.18; filter:blur(2px); }
+    .card.attack { --accent:#ff786f; } .card.defense { --accent:#75d6b7; } .card.tactical { --accent:#8ca9ff; } .card.arena { --accent:#d597ff; }
+    .card-top, .card-foot { display:flex; justify-content:space-between; align-items:center; gap:8px; position:relative; z-index:1; }
+    .type { color:var(--accent); font:9px 'DM Mono'; text-transform:uppercase; letter-spacing:1px; } .mana { display:flex; align-items:center; justify-content:center; gap:4px; min-width:68px; height:31px; padding:0 8px; color:#15121a; background:linear-gradient(135deg,#ffe4a5,var(--gold)); border:1px solid #fff0bd; border-radius:999px; font:700 12px 'DM Mono'; box-shadow:0 0 16px #f0bf6450; } .mana:before { content:"✦"; font-size:12px; }
+    .card-art { position:relative; flex:0 0 45%; min-height:0; margin:8px 0 10px; overflow:hidden; border:1px solid color-mix(in srgb,var(--accent) 70%,transparent); border-radius:10px; background-image:linear-gradient(180deg,#0c0d1644 45%,#0c0d16 100%),var(--portrait); background-size:cover; background-position:center 25%; box-shadow:inset 0 -35px 35px #0b0c14cc; } .card-art:before { content:"✦"; position:absolute; top:9px; right:10px; color:var(--accent); font-size:18px; text-shadow:0 0 12px var(--accent); } .card-art:after { content:""; position:absolute; inset:6px; border:1px solid #ffffff38; border-radius:7px; pointer-events:none; } .card-art-label { position:absolute; left:9px; bottom:7px; z-index:1; color:#fff; font:9px 'DM Mono'; text-transform:uppercase; letter-spacing:1px; text-shadow:0 1px 5px #000; }
+    .mana-use { display:flex; align-items:center; justify-content:space-between; gap:7px; margin:-2px 0 8px; color:#d5c28e; font:8px 'DM Mono'; letter-spacing:.7px; text-transform:uppercase; } .mana-pips { display:flex; gap:2px; flex:1; max-width:76px; } .mana-pip { height:4px; flex:1; border-radius:4px; background:#ffffff1a; } .mana-pip.used { background:var(--gold); box-shadow:0 0 5px #f0bf6477; }
+    .card h3 { font-size:clamp(16px,1.55vw,20px); line-height:1.05; margin:0 0 7px; max-width:210px; } .card p { color:#c3c4d2; font-size:11px; line-height:1.35; margin:0; flex:1; overflow:hidden; }
+    .card-foot { margin-top:9px; padding-top:8px; border-top:1px solid var(--line); color:#77798e; font:9px 'DM Mono'; } .inspect { color:var(--gold-soft); }
+    .empty { grid-column:1/-1; text-align:center; padding:70px 20px; color:var(--muted); border:1px dashed var(--line); border-radius:14px; }
+    .ultimate-panel { margin:24px 0 8px; padding:22px; border:1px solid #d6ad6177; border-radius:18px; background:linear-gradient(145deg,#28283ecc,#11131fcc); box-shadow:0 12px 35px #0005; } .ultimate-heading { display:flex; justify-content:space-between; align-items:end; gap:16px; margin-bottom:16px; } .ultimate-heading h3 { margin:3px 0 0; font-size:clamp(20px,3vw,30px); } .ultimate-heading p { max-width:520px; margin:0; color:var(--muted); font-size:12px; line-height:1.5; } .ultimate-character { color:var(--gold-soft); } .ultimate-options { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; } .ultimate-card { position:relative; min-height:178px; padding:15px; color:var(--ink); text-align:left; border:1px solid color-mix(in srgb,var(--accent) 62%,#ffffff22); border-radius:13px; background:linear-gradient(145deg,#303149,#151725); overflow:hidden; transition:.2s transform,.2s border-color,.2s box-shadow; } .ultimate-card:before { content:""; position:absolute; inset:0; background:linear-gradient(135deg,var(--accent),transparent 55%); opacity:.12; pointer-events:none; } .ultimate-card:hover { transform:translateY(-4px); border-color:var(--accent); box-shadow:0 12px 25px #0008,0 0 20px color-mix(in srgb,var(--accent) 20%,transparent); } .ultimate-card .ultimate-cost { position:absolute; right:12px; top:12px; color:#15121a; background:var(--gold); border-radius:99px; padding:5px 8px; font:700 10px 'DM Mono'; } .ultimate-card .ultimate-type { color:var(--accent); font:9px 'DM Mono'; text-transform:uppercase; letter-spacing:1px; } .ultimate-card h4 { margin:30px 0 9px; font-size:18px; } .ultimate-card p { margin:0; color:#c3c4d2; font-size:11px; line-height:1.45; } .ultimate-selected { display:none; align-items:center; justify-content:space-between; gap:12px; color:#cfe8d8; font-size:12px; } .ultimate-selected strong { color:var(--gold-soft); } .ultimate-selected button { border:1px solid #75d6b7; border-radius:8px; padding:8px 11px; color:#cfe8d8; background:#75d6b71c; cursor:pointer; font:11px 'DM Mono'; } .ultimate-panel.chosen .ultimate-heading { margin-bottom:0; } .ultimate-panel.chosen .ultimate-options { display:none; } .ultimate-panel.chosen .ultimate-selected { display:flex; }
+    .modal-backdrop { position:fixed; inset:0; display:none; place-items:center; padding:20px; z-index:20; background:#06070dcc; backdrop-filter:blur(10px); } .modal-backdrop.open { display:grid; }
+    .modal { width:min(580px,100%); position:relative; padding:30px; border:1px solid #d6ad6177; border-radius:18px; background:linear-gradient(145deg,#28283e,#11131f); box-shadow:0 25px 80px #0009; } .close { position:absolute; right:14px; top:12px; border:0; color:var(--muted); background:transparent; font-size:24px; } .modal .type { margin-bottom:13px; } .modal h2 { font-size:36px; margin:0 0 14px; } .modal p { color:#c6c6d3; line-height:1.7; } .modal .cost { color:var(--gold-soft); font:12px 'DM Mono'; }
+    @media (max-width:700px) { .wrap { width:min(100% - 28px,1440px); } header { padding-top:18px; } .header-meta { display:none; } .hero { display:block; padding-top:28px; } .hero h2 { letter-spacing:-2px; } .stats { margin-top:25px; min-width:0; } .stat { padding:13px; } .stat b { font-size:22px; } #grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .card { padding:8px; } .card-art { flex-basis:45%; margin-top:6px; margin-bottom:8px; } .card h3 { font-size:16px; } .card p { font-size:10px; } .mana-use { gap:4px; font-size:7px; } .mana-pips { max-width:62px; } .ultimate-heading { display:block; } .ultimate-heading p { margin-top:8px; } .ultimate-options { grid-template-columns:1fr; } .ultimate-card { min-height:145px; } }
+    @media (max-width:420px) { #grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><div class="sigil">♛</div><div><div class="eyebrow">Gambit &amp; Glitch</div><h1>Crown of Glyphs</h1></div></div>
+      <div class="header-meta"><span class="pill">CARD VAULT / v1.0</span><span>TACTICAL ARCHIVE</span></div>
+    </header>
+    <main>
+      <section class="hero"><div><div class="eyebrow">Master expansion · 140 cards</div><h2>Shape your kingdom's<br>ultimate strategy.</h2><p>Explore every tactical card from the PRD. Each turn gives you a maximum of 10 mana—build the right combination to control the board.</p></div><div class="stats"><div class="stat"><b>140</b><span>Total cards</span></div><div class="stat"><b>4</b><span>Categories</span></div><div class="stat"><b>10</b><span>Max mana</span></div></div></section>
+      <section class="ultimate-panel" id="ultimate-panel"><div class="ultimate-heading"><div><div class="eyebrow">Opening choice · King ultimate</div><h3>Choose <select id="ultimate-character-select" class="ultimate-character"></select> signature skill.</h3></div><p>At the start of the game, choose one of three unique King skills. The chosen card leaves the choice pool and becomes your character's ultimate.</p></div><div class="ultimate-options" id="ultimate-options"></div><div class="ultimate-selected" id="ultimate-selected"></div></section>
+      <div class="toolbar"><div class="search"><input id="search" type="search" placeholder="Search card name or effect..."></div><select id="sort"><option value="number">PRD order</option><option value="mana-low">Mana: low → high</option><option value="mana-high">Mana: high → low</option><option value="name">Name: A → Z</option></select><div class="filter-block"><span class="filter-caption">Character</span><div class="filters" id="characters"></div></div><div class="filter-block"><span class="filter-caption">Category</span><div class="filters" id="categories"></div></div></div>
+      <div class="section-label"><span id="result-count">140 cards found</span><span>click a card for details</span></div>
+      <section id="grid"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="backdrop"><article class="modal"><button class="close" id="close" aria-label="Tutup">×</button><div class="type" id="modal-type"></div><h2 id="modal-title"></h2><div class="cost" id="modal-cost"></div><p id="modal-owner"></p><p id="modal-effect"></p></article></div>
+  <script>
+    const groups = [
+      ['attack','Attack & Execution',[
+        ['Axe Bash',3,'4 Physical Damage dan mendorong musuh 1 petak ke belakang.'],['Starbolt',3,'3 Magic Damage dan efek Stun selama 1 giliran pada jangkauan 3 petak.'],['Shadow Mend',1,'Mengorbankan 2 HP sendiri untuk memberikan 5 Dark Damage instan ke musuh.'],['Backstab',5,'8 Physical Damage jika dipakai dari petak belakang musuh.'],['Inferno Strike',4,'3 Fire Damage per giliran selama 2 giliran pada petak target.'],['Blade Dance',4,'2 Damage AoE ke seluruh musuh di 4 petak sekitar unit.'],['Snipe Shot',4,'4 Ranged Damage lurus menembus barisan bidak.'],['Crushing Blow',3,'Menghancurkan 2 poin Shield/Armor musuh dan memberikan 3 Physical Damage.'],['Void Slash',5,'6 Pure Damage menembus efek Shield dan Armor.'],['Executioner Decree',6,'10 Damage fatal jika HP musuh di bawah 30%.'],['Dual Cleave',3,'3 Damage ke 2 petak bersebelahan di depan unit.'],['Piercing Thrust',2,'3 Physical Damage menembus 2 bidak sejajar.'],['Shield Breaker',2,'Menghancurkan seluruh Shield musuh tanpa memberikan HP damage.'],['Viper Bite',2,'2 Damage instan + 1 Poison Damage selama 3 giliran.'],['Heavy Slam',4,'5 Physical Damage dan mengurangi movement musuh 1 petak.'],['Reap',5,'4 Damage ke seluruh musuh di baris depan.'],['Soul Strike',3,'3 Magic Damage dan menyerap 2 HP untuk caster.'],['Flame Cannon',5,'5 Fire Damage pada area 2x1 petak.'],['Crossbow Bolt',2,'3 Ranged Damage pada jangkauan lurus 4 petak.'],['Whirlwind',5,'3 Damage ke seluruh 8 petak di sekeliling unit.'],['Shadow Spike',3,'4 Dark Damage dari bawah petak musuh.'],['Blood Blade',2,'Korbankan 1 HP untuk memberikan 4 Physical Damage.'],['Thunder Strike',4,'4 Magic Damage + 50% peluang Stun.'],['Explosive Shot',5,'4 Ranged Damage + 2 Splash Damage ke petak sekitar.'],['Lethal Precision',4,'6 Physical Damage jika unit tidak bergerak giliran ini.'],['Guillotine',6,'8 Damage ke musuh yang terperangkap debuff.'],['Shield Charge',3,'2 Physical Damage + mendorong musuh 2 petak.'],['Venomous Sweep',3,'2 Damage + efek Poison area 1x3 petak.'],['Arcane Beam',6,'7 Magic Damage lurus sepanjang papan.'],['Disarming Strike',3,'3 Damage dan mengunci skill musuh 1 giliran.'],['Overpower',4,'5 Physical Damage mengabaikan 50% Armor.'],['Dark Nova',7,'6 Dark Damage AoE area 3x3 petak.'],['Ambush',3,'5 Physical Damage jika dilancarkan dari rumput/zona gelap.'],['Shatter Blow',4,'4 Damage dan menghancurkan obstacle batu musuh.'],['Final Retribution',8,'12 Damage ke 1 target jika Raja dalam kondisi kritis.']]],
+      ['defense','Defense & Recovery',[
+        ['Runestoned Restoration',1,'+3 HP instan + regenerasi +1 HP/giliran selama 2 giliran.'],['Forest Bloom',3,'Area 2x2: menyembuhkan +4 HP sekutu dan menghapus debuff.'],['Shield of Balin',3,'+5 Poin Shield untuk unit Pion atau Benteng.'],['Arcane Ward',5,'Membentangkan barrier di 3 petak yang memblokir serangan jarak jauh 1 giliran.'],['Iron Skin',2,'Mengurangi semua damage yang diterima unit sebesar 50% selama 1 giliran.'],['Divine Grace',4,'+5 HP instan untuk Raja + 2 Armor tambahan.'],['Mirror Shield',3,'Memantulkan 50% damage serangan fisik kembali ke penyerang.'],['Sanctuary',4,'Zona 5 petak pola salib; unit tidak dapat ditarget kartu musuh 1 giliran.'],['Holy Aura',3,'+2 HP per giliran untuk seluruh unit sekutu selama 2 giliran.'],['Stone Armor',2,'+3 Armor permanen tapi mengurangi movement 1 petak.'],['Purify',1,'Menghapus seluruh efek debuff dan racun dari 1 unit.'],['Guardian Angel',5,'Mencegah unit mati sekali dan menyisakan 1 HP.'],['Life Link',3,'Menghubungkan 2 unit sekutu untuk membagi damage 50%.'],['Vanguard Shield',2,'+4 Shield untuk unit baris paling depan.'],['Elixir of Life',4,'Menyembuhkan +6 HP untuk 1 unit target.'],['Runic Barrier',3,'Menyerap 4 Magic Damage berikutnya yang diterima.'],['Reflective Barrier',4,'Memantulkan serangan sihir musuh kembali ke pengguna.'],['Fortify Position',2,'+2 Shield ke seluruh unit yang tidak bergerak.'],['Healing Totem',3,'Memanggil totem di petak yang menyembuhkan +2 HP area 1 petak.'],['Phoenix Blessing',6,'Memberikan efek hidup kembali dengan 3 HP saat tereliminasi.'],['Aegis Dome',5,'Membuat kubah pelindung area 2x2 bebas dari damage AoE.'],['Barkskin',1,'+2 Armor sementara selama 2 giliran.'],['Light of Hope',4,'Menyembuhkan Raja sebesar +4 HP dan memberi +1 Mana.'],['Resilient Wall',3,'Unit mendapatkan kebal knockback dan stun selama 2 giliran.'],['Vitality Surge',2,'Meningkatkan max HP unit sebesar +3 poin.'],['Absorb Magic',3,'Mengubah damage sihir yang diterima menjadi mana (+2 Mana).'],['Defensive Stance',1,'+3 Shield tapi unit tidak dapat menyerang di giliran ini.'],['Soul Barrier',4,'+6 Shield berbasis jumlah unit sekutu yang hidup.'],['Cleanse Field',3,'Menghapus semua zona hazard (lava/racun) di papan.'],['Chalice of Renewal',5,'Menyembuhkan seluruh unit sekutu sebesar +3 HP.'],['Iron Will',2,'Unit kebal dari efek instan-kill selama 2 giliran.'],['Protective Veil',3,'Unit tidak dapat ditarget serangan fisik selama 1 giliran.'],['Natures Emissary',4,'+4 HP dan +2 Shield pada unit monster/pet.'],['Bastion of Light',6,'+8 Shield untuk Raja dan +3 Shield untuk unit sekitarnya.'],['Immortal Stand',7,'Raja tidak dapat menerima damage selama 1 giliran penuh.']]],
+      ['tactical','Movement & Tactics',[
+        ['Vanish into Smoke',3,'Efek Invisibility selama 1 giliran dari target sihir/serangan.'],['Shadow Switch',2,'Memukar posisi unit Pion/Benteng dengan Raja/Ratu secara instan.'],['Rune Dash',1,'+1 Petak Jarak Tempuh Ekstra pada giliran ini.'],['Gravity Pull',2,'Menarik semua bidak di baris yang sama sejauh 1 petak mendekati unit.'],['Phantom Decoy',3,'Memunculkan bayangan palsu (1 HP) untuk memancing serangan musuh.'],['Tactical Retreat',1,'Langkah mundur diagonal 2 petak tanpa memicu attack.'],['Leapfrog',2,'Unit Pion melompati 1 bidak di depannya untuk maju 2 petak.'],['Blink Step',3,'Teleportasi instan ke petak kosong mana pun dalam radius 2 petak.'],['Swift Leap',2,'Melompati 1 petak kosong atau obstacle secara langsung.'],['Gale Thrust',2,'Mendorong bidak sekutu atau musuh sejauh 2 petak lurus.'],['Dimension Door',5,'Teleportasi Raja ke petak mana pun di wilayah sendiri.'],['Hookshot',2,'Menarik musuh sejauh 2 petak mendekati unit caster.'],['Shadow Step',3,'Pindah instan ke belakang musuh target.'],['Windwalk',2,'Bidak dapat menembus bidak lain saat bergerak giliran ini.'],['Charge Order',3,'Seluruh Pion maju 1 petak secara bersamaan.'],['Reposition',1,'Mengeser 1 unit sekutu 1 petak ke samping.'],['Escape Hatch',3,'Mengembalikan unit sekutu ke baris paling belakang.'],['Mass Teleport',6,'Memindahkan 3 unit sekutu ke posisi baru secara acak.'],['Portal Gun',4,'Membuat 2 portal terhubung di papan selama 2 giliran.'],['Sprint',1,'+2 Petak jarak tempuh untuk unit Kuda/Assassin.'],['Vault',2,'Melompati unit musuh dan mendarat di belakangnya.'],['Magnetic Pull',3,'Menarik 2 musuh terdekat untuk saling berdempetan.'],['Distraction',2,'Memutar arah pandang musuh 180 derajat.'],['Sidestep',1,'Menghindar 1 petak ke samping saat diserang.'],['Phase Shift',4,'Unit masuk ke dimensi lain (kebal & tidak bisa bergerak 1 giliran).'],['Flank Order',3,'Unit Kuda dapat bergerak 2 kali dalam 1 giliran.'],['Tactical Swap',3,'Memukar posisi 2 unit musuh secara acak.'],['Forced March',4,'+1 Movement ke seluruh unit sekutu giliran ini.'],['Backflip',2,'Mundur 2 petak setelah melakukan serangan fisik.'],['Shadow Form',4,'Bidak tidak terhalang medan dan kebal trap 2 giliran.'],['Overclock Step',2,'+3 Movement tapi menerima 1 Damage di akhir giliran.'],['Pawn Promotion Order',5,'Memajukan Pion ke baris paling ujung musuh secara instan.'],['Spatial Recall',3,'Mengembalikan unit ke posisi awal giliran sebelumnya.'],['Sky Fall',4,'Melompat tinggi dan mendarat di petak manapun dalam radius 3 petak.'],['Grand Maneuver',7,'Seluruh unit sekutu dapat bergerak kembali di giliran ini.']]],
+      ['arena','Elements & Arena Manipulation',[
+        ['Glitch Portal',2,'Memindahkan 1 bidak target ke petak kosong secara acak.'],['Molten Rune',3,'Mengubah 1 petak batu menjadi Lava (2 Damage/giliran, bertahan 3 giliran).'],['Frozen Tomb',4,'Freeze 1 petak target selama 1 giliran (Bidak terperangkap).'],['Blood Sacrifice',0,'Korbankan 3 HP Raja → Dapatkan +2 Mana instan & tarik +2 kartu.'],['Doom Counter',4,'Kutukan 3 giliran; musuh meledak memberikan 8 AoE Damage jika tak hancur.'],['Mind Glitch',5,'Mengendalikan 1 Pion musuh untuk menyerang rekannya sendiri.'],['Chain Lightning',4,'3 Magic Damage pada target + 2 Magic Damage pada 2 musuh terdekat.'],['Stone Wall',2,'Memunculkan Tembok Batu (HP: 6) di 1 petak kosong.'],['Temporal Rift',7,'Mengembalikan posisi seluruh bidak ke kondisi 1 giliran sebelumnya.'],['Acid Rain',4,'Area 2x2: Mengurangi Armor musuh sebesar 2 poin selama 2 giliran.'],['Blizzard',5,'Membuat 4 petak membeku dan memberi 2 Damage AoE.'],['Earthquake',6,'Mengguncang papan: 2 Damage ke seluruh bidak dan menghancurkan wall.'],['Poison Cloud',3,'Menciptakan awan racun 2x2 (1 Damage per giliran selama 3 giliran).'],['Overload Mana',1,'+3 Mana giliran ini, tapi -2 Mana di giliran berikutnya.'],['Static Field',2,'Memberikan 1 Damage ke seluruh musuh yang berada di dekat ubin rune.'],['Vortex Trap',3,'Membuat pusaran di 1 petak yang menarik musuh jika mendekat.'],['Time Stop',8,'Hentikan giliran musuh (musuh kehilangan 1 giliran berikutnya).'],['Mana Burn',4,'Menghancurkan 3 Mana milik musuh pada giliran berikutnya.'],['Gravity Well',4,'Menyerap seluruh pergerakan musuh di radius 2 petak.'],['Corrupt Rune',3,'Mengubah rune biru musuh menjadi rune merah milik sendiri.'],['Eruption',5,'Petak lava meledak memberikan 5 Damage AoE di sekitarnya.'],['Ice Wall',3,'Membuat tembok es (HP: 4) yang membekukan musuh saat dihancurkan.'],['Wild Glitch',2,'Mengacak seluruh efek kartu di tangan menjadi kartu acak.'],['Lightning Rod',3,'Menancapkan petir di petak; menyambar musuh terdekat setiap giliran.'],['Energy Drain',3,'Mencuri 2 Mana musuh dan menembakkannya ke caster.'],['Spatial Distortion',4,'Menukar wilayah rune biru dan rune merah di 4 petak.'],['Supernova',9,'10 Damage AoE ke seluruh papan tetapi menghancurkan 2 unit sendiri.'],['Fog of War',3,'Menutup 6 petak dengan kabut; musuh tidak dapat membidik zona ini.'],['Chain Reaction',5,'Meledakkan seluruh obstacle/wall di papan (3 Damage per wall).'],['Necrotic Curse',4,'Unit musuh tidak dapat disembuhkan selama 3 giliran.'],['Rune Resonance',2,'+2 Mana jika Raja berdiri di atas petak rune aktif.'],['Solar Flare',5,'4 Damage + membuang 1 kartu acak dari tangan musuh.'],['Absolute Zero',6,'Membekukan seluruh Pion di papan selama 1 giliran.'],['Chaos Surge',3,'Efek acak: bisa menyembuhkan 5 HP atau memberikan 5 Damage.'],['Reality Rewrite',10,'Mereset HP seluruh Raja kembali seperti saat awal game.']]]
+    ];
+    const characters = [
+      ['ironfury','Ironfury','Desain Game/karakter/16c3cbc6-07ff-4492-989f-059ed3a38ed2.webp','#ff786f',[
+        ['Fury Unbound',5,'Gain +2 damage on every attack this turn.'],
+        ['Molten Execution',8,'Deal 12 Fire Damage and destroy 3 Armor.'],
+        ['Warborn Revival',7,'Restore 8 HP and become immune to Stun for 2 turns.']
+      ]],
+      ['weaver','Elemental Weaver','Desain Game/karakter/3b67d6ce-57af-4a0d-b264-c4460ad153cd.webp','#d597ff',[
+        ['Primal Convergence',8,'Deal 8 Magic Damage in a 3x3 area and apply Burn.'],
+        ['Elemental Overload',6,'Your next three cards cost 0 Mana this turn.'],
+        ['Astral Rewriting',10,'Reset all battlefield hazards and deal 10 Pure Damage.']
+      ]],
+      ['night-edge','Night’s Edge','Desain Game/karakter/4fc26604-a9b3-4195-a0c7-7ed27a98dd47.webp','#8ca9ff',[
+        ['Perfect Ambush',6,'Become Invisible and deal 10 Dark Damage from behind.'],
+        ['Eclipse Step',5,'Teleport behind any enemy and take one extra action.'],
+        ['Deathmark Covenant',8,'Mark an enemy; the next hit against it is fatal below 50% HP.']
+      ]],
+      ['royal-aegis','Royal Aegis','Desain Game/karakter/ebda99a9-72d8-408b-9931-9f160ea34dcd.webp','#75d6b7',[
+        ['Crownward Bastion',7,'Give the King 10 Shield and nearby allies 4 Shield.'],
+        ['Royal Decree',6,'Cleanse all allies and prevent damage for 1 turn.'],
+        ['Throne of Eternity',10,'The King cannot be eliminated for 2 turns.']
+      ]]
+    ];
+    const mapTextures = {
+      attack:'Desain Game/Create_clean_chess_look_54fd2dbf_2K.jpg',
+      defense:'Desain Game/Placing_lights_without_divider_352cd999_2K.jpg',
+      tactical:'Desain Game/7cd7b53e-fbfa-47a5-a41a-ded713f9321e.webp',
+      arena:'Desain Game/Gemini_Generated_Image_rhft5jrhft5jrhft.jpg'
+    };
+    const phraseTranslations = [
+      ['selama 1 giliran','for 1 turn'],['selama 2 giliran','for 2 turns'],['selama 3 giliran','for 3 turns'],
+      ['pada giliran ini','this turn'],['giliran ini','this turn'],['per giliran','per turn'],['di akhir giliran','at the end of the turn'],
+      ['ke seluruh','to all'],['seluruh','all'],['musuh terdekat','nearest enemy'],['musuh target','target enemy'],
+      ['unit sekutu','allied unit'],['unit musuh','enemy unit'],['unit','unit'],['musuh','enemy'],['sekutu','ally'],
+      ['memberikan','deals'],['memberi','grants'],['menerima','receives'],['mengurangi','reduces'],['meningkatkan','increases'],
+      ['Mengorbankan','Sacrifice'],['Korbankan','Sacrifice'],['Menghapus','Removes'],['Menghancurkan','Destroys'],
+      ['Menyembuhkan','Heals'],['menyerap','absorbs'],['Memantulkan','Reflects'],['Memanggil','Summons'],['Membuat','Creates'],
+      ['Memindahkan','Moves'],['Memukar','Swaps'],['Menarik','Pulls'],['Mendorong','Pushes'],['Melompati','Leaps over'],
+      ['Teleportasi instan','Instantly teleport'],['Pindah instan','Instantly move'],['Mundur','Retreat'],['Maju','Advance'],
+      ['damage','damage'],['Physical Damage','Physical Damage'],['Magic Damage','Magic Damage'],['Dark Damage','Dark Damage'],
+      ['Fire Damage','Fire Damage'],['Ranged Damage','Ranged Damage'],['Pure Damage','Pure Damage'],
+      ['Damage','Damage'],['Armor','Armor'],['Shield','Shield'],['HP','HP'],['Mana','Mana'],['petak','tile'],
+      ['baris','row'],['area','area'],['jangkauan','range'],['efek','effect'],['racun','poison'],['debuff','debuff'],
+      ['kebal','immune'],['tidak dapat','cannot'],['dapat','can'],['dengan','with'],['untuk','to'],['dan','and'],
+      ['atau','or'],['jika','if'],['yang','that'],['dari','from'],['ke','to'],['di','on'],['sejauh','by'],
+      ['secara bersamaan','simultaneously'],['secara acak','randomly'],['secara instan','instantly'],['penuh','full'],
+      ['permanen','permanently'],['sementara','temporarily'],['depan','front'],['belakang','back'],['kosong','empty'],
+      ['bergerak','move'],['menyerang','attack'],['diserang','attacked'],['terperangkap','trapped'],['hidup','alive'],
+      ['mati','dead'],['kondisi kritis','critical condition'],['giliran','turn'],['papan','board'],
+      ['instan','instant'],['regenerasi','regeneration'],['peluang','chance'],['menembus','pierces'],['mengabaikan','ignores'],
+      ['mengunci','locks'],['menyisakan','leaves'],['terhubung','links'],['membagi','splits'],['mengubah','converts'],
+      ['mendekati','toward'],['memicu','triggering'],['target','target'],['Raja','King'],['Ratu','Queen'],
+      ['Benteng','Rook'],['Kuda','Knight'],['Pion','Pawn'],['bidak','piece'],['monster','monster'],['pet','pet'],
+      ['awal game','start of the game'],['tidak bergerak','does not move'],['tidak dapat ditarget','cannot be targeted'],
+      ['dilancarkan','cast'],['dilakukan','performed'],['berikutnya','next'],['sekutu yang hidup','living allies']
+    ];
+    function translateEffect(effect) {
+      return phraseTranslations.reduce((text, [from, to]) => text.replace(new RegExp(`\\b${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), to), effect)
+        .replace(/\+(\d+)/g, '+$1')
+        .replace(/\s+/g, ' ')
+        .replace(/(^|[.!?]\s+)([a-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase());
+    }
+    const cards = groups.flatMap(([kind, label, list]) => list.map(([name, mana, effect], index) => {
+      const owner = characters[(groups.findIndex(group => group[0] === kind) * 35 + index) % characters.length];
+      return {kind,label,name,mana,effect:translateEffect(effect),owner,map:mapTextures[kind]};
+    }));
+    const ultimateSelect=document.querySelector('#ultimate-character-select'), ultimatePanel=document.querySelector('#ultimate-panel'), ultimateOptions=document.querySelector('#ultimate-options'), ultimateSelected=document.querySelector('#ultimate-selected');
+    const chosenUltimates={};
+    characters.forEach(([key,name,,,ultimates]) => { const option=document.createElement('option'); option.value=key; option.textContent=name; ultimateSelect.append(option); });
+    function renderUltimateChoice() {
+      const character=characters.find(item=>item[0]===ultimateSelect.value), [key,name,,,ultimates]=character;
+      ultimatePanel.classList.toggle('chosen', Boolean(chosenUltimates[key]));
+      if (chosenUltimates[key]) {
+        ultimateSelected.innerHTML=`<span><strong>${name}'s Ultimate:</strong> ${chosenUltimates[key][0]} — ${chosenUltimates[key][2]}</span><button type="button" id="change-ultimate">Reset choice</button>`;
+        document.querySelector('#change-ultimate').onclick=()=>{ delete chosenUltimates[key]; renderUltimateChoice(); };
+        return;
+      }
+      ultimateOptions.innerHTML=ultimates.map(([skill,mana,effect],index)=>`<button type="button" class="ultimate-card" style="--accent:${character[3]}" data-index="${index}"><span class="ultimate-type">${name} · King Skill</span><span class="ultimate-cost">${mana} MANA</span><h4>${skill}</h4><p>${effect}</p></button>`).join('');
+      ultimateOptions.querySelectorAll('.ultimate-card').forEach(button=>button.onclick=()=>{ chosenUltimates[key]=ultimates[Number(button.dataset.index)]; renderUltimateChoice(); });
+    }
+    ultimateSelect.onchange=renderUltimateChoice;
+    renderUltimateChoice();
+    let activeCategory='all', activeCharacter='all';
+    const grid=document.querySelector('#grid'), search=document.querySelector('#search'), sort=document.querySelector('#sort');
+    const characterFilters=document.querySelector('#characters'), categoryFilters=document.querySelector('#categories');
+    function addFilter(parent, key, label, selected, callback) {
+      const b=document.createElement('button'); b.className='filter'+(selected?' active':''); b.textContent=label;
+      b.onclick=()=>{ parent.querySelectorAll('.filter').forEach(x=>x.classList.remove('active')); b.classList.add('active'); callback(key); render(); };
+      parent.append(b);
+    }
+    addFilter(characterFilters, 'all', 'All', true, key => activeCharacter=key);
+    characters.forEach(([key,label]) => addFilter(characterFilters, key, label, false, value => activeCharacter=value));
+    addFilter(categoryFilters, 'all', 'All', true, key => activeCategory=key);
+    groups.forEach(([key,label]) => addFilter(categoryFilters, key, label, false, value => activeCategory=value));
+    function render() {
+      const q=search.value.toLowerCase().trim(); let list=cards.filter(c=>(activeCategory==='all'||c.kind===activeCategory)&&(activeCharacter==='all'||c.owner[0]===activeCharacter)&&(!q||`${c.name} ${c.effect} ${c.owner[1]}`.toLowerCase().includes(q)));
+      const mode=sort.value; list=[...list].sort((a,b)=>mode==='mana-low'?a.mana-b.mana:mode==='mana-high'?b.mana-a.mana:mode==='name'?a.name.localeCompare(b.name):cards.indexOf(a)-cards.indexOf(b));
+      document.querySelector('#result-count').textContent=`${list.length} cards found`;
+      grid.innerHTML=list.length?list.map((c)=>`<article class="card ${c.kind}" data-name="${c.name}" style="--portrait:url('${c.owner[2]}');--map:url('${c.map}');--accent:${c.owner[3]}"><div class="card-top"><span class="type">${c.label}</span><span class="mana">${c.mana} MANA</span></div><div class="card-art"><span class="card-art-label">${c.owner[1]}</span></div><div class="mana-use"><span>COST / 10 MANA</span><span class="mana-pips">${Array.from({length:10},(_,i)=>`<i class="mana-pip ${i<c.mana?'used':''}"></i>`).join('')}</span></div><h3>${c.name}</h3><p>${c.effect}</p><div class="card-foot"><span>${c.owner[1]}</span><span class="inspect">${String(cards.indexOf(c)+1).padStart(3,'0')} / 140 ↗</span></div></article>`).join(''):'<div class="empty">No cards match your search. Try another keyword or filter.</div>';
+      grid.querySelectorAll('.card').forEach(el=>el.onclick=()=>openCard(cards.find(c=>c.name===el.dataset.name)));
+    }
+    const backdrop=document.querySelector('#backdrop'); function openCard(c){ document.querySelector('#modal-type').textContent=c.label; document.querySelector('#modal-title').textContent=c.name; document.querySelector('#modal-cost').textContent=`${c.mana} MANA · MAXIMUM CAPACITY 10`; document.querySelector('#modal-owner').textContent=`Character deck: ${c.owner[1]}`; document.querySelector('#modal-effect').textContent=c.effect; backdrop.classList.add('open'); }
+    function closeModal(){backdrop.classList.remove('open');} document.querySelector('#close').onclick=closeModal; backdrop.onclick=e=>{if(e.target===backdrop)closeModal();}; document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+    search.oninput=render; sort.onchange=render; render();
+  </script>
+</body>
+</html>
